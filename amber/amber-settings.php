@@ -66,6 +66,14 @@ class AmberSettingsPage
         );  
 
         add_settings_field(
+            'perma_capture',
+            'Perma captures',
+            array( $this, 'perma_capture_callback' ),
+            'amber-settings-admin',
+            'amber_cache_section'
+        );
+
+        add_settings_field(
             'amber_max_file', 
             'Maximum file size (kB)', 
             array( $this, 'amber_max_file_callback' ), 
@@ -211,6 +219,7 @@ class AmberSettingsPage
     {
         $new_input = array();
         $valid_integer_options = array(
+            'perma_capture',
             'amber_max_file',
             'amber_max_disk',
             'amber_available_action',
@@ -282,6 +291,16 @@ jQuery(document).ready(function($) {
     /** 
      * Get the settings option array and print one of its values
      */
+
+    public function perma_capture_callback()
+    {
+        printf(
+            '<input type="checkbox" id="perma_capture" name="amber_options[perma_capture]" value="1" %s/> ' .
+            '<p class="description">Amber will use Perma to store captures.</p>',
+            checked( 1, $this->options['perma_capture'], false )
+        );
+    }
+
     public function amber_max_file_callback()
     {
         printf(
