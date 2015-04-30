@@ -19,6 +19,7 @@ class AmberInstall {
 		  date int,
 		  type VARCHAR(200) DEFAULT '' NOT NULL,
 		  size int,
+		  perma_guid VARCHAR(255),
 		  PRIMARY KEY id (id)
 		)";
 		$tables['amber_activity'] =  "(
