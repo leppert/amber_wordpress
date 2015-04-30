@@ -71,6 +71,16 @@ class Amber {
 	  	return $fetcher;
 	}
 
+	/**
+	 * Return an initialized PermaFetcher module
+	 * @return IAmberFetcher
+	 */
+	public static function get_perma_fetcher() {
+
+    	$fetcher = new PermaFetcher(array('perma_api_key' => Amber::get_option('perma_api_key')));
+	  	return $fetcher;
+	}
+
 
 	private static function get_behavior($status, $country = false)
 	{
@@ -236,6 +246,7 @@ class Amber {
 		$checker = Amber::get_checker();
 		$status =  Amber::get_status();
 		$fetcher = Amber::get_fetcher();
+		$perma_fetcher = Amber::get_perma_fetcher();
 
 		/* Check whether the site is up */
 		$last_check = $status->get_check($item);
@@ -252,6 +263,7 @@ class Amber {
 				$cache_metadata = array();
 				try {
 					$cache_metadata = $fetcher->fetch($item);
+					$perma_fetcher->fetch($item);
 				} catch (RuntimeException $re) {
 					$update['message'] = $re->getMessage();
 					$status->save_check($update);        
@@ -733,6 +745,8 @@ include_once dirname( __FILE__ ) . '/libraries/AmberStorage.php';
 include_once dirname( __FILE__ ) . '/libraries/AmberFetcher.php';
 include_once dirname( __FILE__ ) . '/libraries/AmberChecker.php';
 include_once dirname( __FILE__ ) . '/libraries/AmberDB.php';
+
+include_once dirname( __FILE__ ) . '/libraries/PermaFetcher.php';
 
 /* The filter to lookup and rewrite links with amber data- attributes */
 add_filter ( 'the_content', array('Amber', 'filter'));
