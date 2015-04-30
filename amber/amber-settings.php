@@ -66,9 +66,9 @@ class AmberSettingsPage
         );  
 
         add_settings_field(
-            'perma_capture',
-            'Perma captures',
-            array( $this, 'perma_capture_callback' ),
+            'perma_api_key',
+            'Perma API key',
+            array( $this, 'perma_api_key_callback' ),
             'amber-settings-admin',
             'amber_cache_section'
         );
@@ -219,7 +219,6 @@ class AmberSettingsPage
     {
         $new_input = array();
         $valid_integer_options = array(
-            'perma_capture',
             'amber_max_file',
             'amber_max_disk',
             'amber_available_action',
@@ -238,6 +237,7 @@ class AmberSettingsPage
         }
 
         $valid_string_options = array(
+            'perma_api_key',
             'amber_storage_location',
             'amber_excluded_sites',
             'amber_excluded_formats',
@@ -292,12 +292,12 @@ jQuery(document).ready(function($) {
      * Get the settings option array and print one of its values
      */
 
-    public function perma_capture_callback()
+    public function perma_api_key_callback()
     {
         printf(
-            '<input type="checkbox" id="perma_capture" name="amber_options[perma_capture]" value="1" %s/> ' .
-            '<p class="description">Amber will use Perma to store captures.</p>',
-            checked( 1, $this->options['perma_capture'], false )
+            '<input type="text" id="perma_api_key" name="amber_options[perma_api_key]" value="%s" /> ' .
+            '<p class="description">If specified, Amber will use Perma to store captures.</p>',
+            isset( $this->options['perma_api_key'] ) ? esc_attr( $this->options['perma_api_key']) : ''
         );
     }
 
