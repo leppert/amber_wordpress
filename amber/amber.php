@@ -16,6 +16,8 @@ define("AMBER_ACTION_CACHE",3);
 define("AMBER_STATUS_UP","up");
 define("AMBER_STATUS_DOWN","down");
 define("AMBER_VAR_LAST_CHECK_RUN","amber_last_check_run");
+define("PERMA_API_URL","http://api.perma.dev:8000");
+define("PERMA_ARCHIVE_URL","http://perma.dev:8000");
 
 class Amber {
 
@@ -94,7 +96,7 @@ class Amber {
 	        $result = NULL;
 	        break;
 	      case AMBER_ACTION_HOVER:
-	        $result .= " hover:"; 
+	        $result .= " hover:";
 	        $result .= Amber::get_option("amber_${c}available_action_hover", 2);
 	        break;
 	      case AMBER_ACTION_POPUP:
@@ -199,7 +201,7 @@ class Amber {
 	  return $text;
 	}
 
-	/* 
+	/*
 	 * Add our CSS and Javascript to every page
 	 */
 	public static function register_plugin_assets() {
@@ -218,7 +220,7 @@ class Amber {
 	 	return $schedules;
 	}
 
-	/** 
+	/**
 	 * Hourly cron job
 	 */
 	public static function cron_event_hook() {
@@ -386,7 +388,7 @@ class Amber {
 				$blacklistitem = trim($blacklistitem);
 				if ($blacklistitem) {
 					$blacklistitem = preg_replace("/https?:\\/\\//i", "", $blacklistitem);
-					$blacklistitem = str_replace("@", "\@", $blacklistitem); 
+					$blacklistitem = str_replace("@", "\@", $blacklistitem);
 					$blacklistitem = '@' . $blacklistitem . '@';
 					$cleanedlink = preg_replace("/https?:\\/\\//i", "", $link);
 					if (preg_match($blacklistitem, $cleanedlink)) {
@@ -413,7 +415,7 @@ class Amber {
 
   		if ($count) {
   			 $result = Amber::cache_links($links['cache'],$cache_immediately);
-  		} 
+  		}
   		foreach ($links['excluded'] as $key) {
   			$result[$key] = "";
   		}
@@ -447,10 +449,10 @@ class Amber {
 	    $extension = substr($last_element, strrpos($last_element, '.') + 1);
 	    switch ($extension) {
 	      case "css" : $data['metadata']['type'] = 'text/css'; break;
-	      case "jpg" : $data['metadata']['type'] = 'image/jpeg'; break;      
-	      case "png" : $data['metadata']['type'] = 'image/png'; break;      
-	      case "svg" : $data['metadata']['type'] = 'image/svg+xml'; break;      
-	      case "js" : $data['metadata']['type'] = 'application/javascript'; break;      
+	      case "jpg" : $data['metadata']['type'] = 'image/jpeg'; break;
+	      case "png" : $data['metadata']['type'] = 'image/png'; break;
+	      case "svg" : $data['metadata']['type'] = 'image/svg+xml'; break;
+	      case "js" : $data['metadata']['type'] = 'application/javascript'; break;
 	    }
 	  }
 	  return (isset($data)) ? $data : NULL;
@@ -465,7 +467,7 @@ class Amber {
 	}
 
 	/**
-	 * Ensure that parameters passed by add_rewrite_rules() are accessible 
+	 * Ensure that parameters passed by add_rewrite_rules() are accessible
 	 */
 	public static function custom_query_vars($vars) {
 		$vars[] = 'amber_cache';
@@ -522,10 +524,10 @@ class Amber {
 <title>Amber</title>
 </head>
 <body style="margin:0; padding: 0; height: 100%">
-<iframe 
+<iframe
 sandbox="allow-scripts allow-forms allow-popups allow-pointer-lock"
 security="restricted"
-style="border:0 none transparent; background-color:transparent; width:100%; height:100%;" 
+style="border:0 none transparent; background-color:transparent; width:100%; height:100%;"
 src="${iframe_url}"
 </body>
 </html>
@@ -551,7 +553,7 @@ EOF;
 	}
 
 	/**
-	 * When displaying cached content, set the Content-Type header for the 
+	 * When displaying cached content, set the Content-Type header for the
      * content item or asset
 	 */
 	public static function filter_cached_content_headers($headers)
@@ -586,7 +588,7 @@ EOF;
 		    	$memento_date = Amber::format_memento_date($data['metadata']['cache']['amber']['date']);
 		    	$headers['Memento-Datetime'] = $memento_date;
 		    }
-		    // PDFs are rendered immediately, not displayed within iframes, 
+		    // PDFs are rendered immediately, not displayed within iframes,
 		    // so set the content-type appropriately
 			if (isset($data['metadata']['type']) && ($data['metadata']['type'] == 'application/pdf')) {
 				$headers['Content-Type'] = $data['metadata']['type'];
@@ -617,19 +619,19 @@ EOF;
 		die();
 	}
 
-	/* Respond to an ajax call from the dashboard as part of the 
+	/* Respond to an ajax call from the dashboard as part of the
 	   "Cache all links" process. Returning an empty string signifies
 	   that all links have been cached.
 	 */
 	public static function ajax_cache() {
 		check_ajax_referer( 'amber_dashboard' );
-	    update_option(AMBER_VAR_LAST_CHECK_RUN, time());		
+	    update_option(AMBER_VAR_LAST_CHECK_RUN, time());
 		$url = Amber::dequeue_link();
 		print $url;
 		die();
 	}
 
-	/* Respond to an ajax call from the dashboard to kick off the 
+	/* Respond to an ajax call from the dashboard to kick off the
 	   scanning process by identifying all pages and posts that
 	   need to be scanned, and placing them in transient storage
 	   to be worked through by ajax_scan().
@@ -651,24 +653,24 @@ EOF;
  	   Return the number of items left to be scanned.
 	 */
 	public static function ajax_scan() {
-		/* Maximum number of pages and posts to process in each 
+		/* Maximum number of pages and posts to process in each
 		   request. This is used for both pages AND posts, so the
 		   maximum per request is actually twice this, depending
 		   on the mix of content on the site */
 		check_ajax_referer( 'amber_dashboard' );
-		$batch_size = 2; 
+		$batch_size = 2;
 		$number_remaining = 0;
 		$transients = array('amber_scan_pages', 'amber_scan_posts');
 		foreach ($transients as $t) {
 			$ids = get_transient($t);
 			if ($ids !== FALSE && is_array($ids)) {
-				$i = 2; 
+				$i = 2;
 				while ((count($ids) > 0) && ($i-- > 0)) {
 					$id = array_shift($ids);
 					Amber::extract_links($id);
 				}
 				set_transient($t, $ids, 24*60*60);
-				$number_remaining += count($ids);	
+				$number_remaining += count($ids);
 			}
 		}
 		print $number_remaining;
@@ -692,11 +694,11 @@ EOF;
 	public static function display_meta_boxes($post)
 	{
 		submit_button("Cache links now", "small", "cache_now");
-		wp_nonce_field( 'amber_cache_now', '_wpnonce_amber' ); 
+		wp_nonce_field( 'amber_cache_now', '_wpnonce_amber' );
 		print '
 <div id="cache-status"></div>
 <script type="text/javascript" >
-jQuery(document).ready(function($) { 
+jQuery(document).ready(function($) {
 ';
 		print "var data = { 'action': 'amber_cache_now', 'id': '$post->ID', '_wpnonce': $('#_wpnonce_amber').val() };";
 		print '
@@ -714,10 +716,10 @@ jQuery(document).ready(function($) {
 					result += "<p><strong>These links were not cached</strong><br/>" + failed + "</p>";
 				}
 				if (!result) {
-					result = "No links found";					
+					result = "No links found";
 				}
 				$("div#cache-status").html(result);
-			} 
+			}
 		}, "json");
 		return false;
 	});});
@@ -729,14 +731,14 @@ jQuery(document).ready(function($) {
 		global $wp_rewrite;
 
 		if (!$wp_rewrite->using_mod_rewrite_permalinks()) {
-			print '    
+			print '
 <div class="error">
-	<p>Permalinks must be enabled (set to something other than "Default") for Amber to work properly. 
+	<p>Permalinks must be enabled (set to something other than "Default") for Amber to work properly.
 	Enable Permalinks <a href="'. get_site_url() . '/wp-admin/options-permalink.php">here</a></p>
 </div>';
-		}	
+		}
 }
- 
+
 
 }
 
