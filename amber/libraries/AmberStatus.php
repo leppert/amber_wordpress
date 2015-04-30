@@ -112,7 +112,7 @@ class AmberStatus implements iAmberStatus {
     }
     $result = $this->db->select("SELECT COUNT(id) as count FROM ${prefix}amber_cache WHERE id = %s", array($data['id']));
     $params = array($data['url'], $data['location'], $data['date'], $data['type'], 
-                    $data['size'], $data['id']);
+                    $data['size'], $data['id'], $data['perma_guid']);
     if ($result['count']) {
       $updateQuery = "UPDATE ${prefix}amber_cache " .
                                         'SET ' .
@@ -121,12 +121,13 @@ class AmberStatus implements iAmberStatus {
                                         'date = %d, ' .
                                         'type = %s, ' .
                                         'size = %d ' .
+                                        'perma_guid = %s' .
                                         'WHERE id = %s';
       $this->db->update($updateQuery, $params);
     } else {
       $updateQuery = "INSERT into ${prefix}amber_cache " .
-                                        '(url, location, date, type, size, id) ' .
-                                        'VALUES(%s, %s, %d, %s, %d, %s)';
+                                        '(url, location, date, type, size, id, perma_guid) ' .
+                                        'VALUES(%s, %s, %d, %s, %d, %s, %s)';
       $this->db->insert($updateQuery, $params);
     }
 

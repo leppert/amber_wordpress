@@ -32,7 +32,7 @@ class PermaFetcher implements iAmberFetcher {
 		$context  = stream_context_create($options);
 		$result = file_get_contents($api_endpoint, false, $context);
 
-    return $result;
+    return json_decode($result, true);
 	}
 
 }

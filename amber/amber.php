@@ -246,7 +246,6 @@ class Amber {
 		$checker = Amber::get_checker();
 		$status =  Amber::get_status();
 		$fetcher = Amber::get_fetcher();
-		$perma_fetcher = Amber::get_perma_fetcher();
 
 		/* Check whether the site is up */
 		$last_check = $status->get_check($item);
@@ -263,10 +262,14 @@ class Amber {
 				$cache_metadata = array();
 				try {
 					$cache_metadata = $fetcher->fetch($item);
-					$perma_fetcher->fetch($item);
+                    if (Amber::get_option('perma_api_key')) {
+						$perma_fetcher = Amber::get_perma_fetcher();
+						$perma_metadata = $perma_fetcher->fetch($item);
+						$cache_metadata['perma_guid'] = $perma_metadata['guid'];
+                    }
 				} catch (RuntimeException $re) {
 					$update['message'] = $re->getMessage();
-					$status->save_check($update);        
+					$status->save_check($update);
 					return false;
 				}
 				if ($cache_metadata) {
