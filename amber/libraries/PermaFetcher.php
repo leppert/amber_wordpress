@@ -17,7 +17,7 @@ class PermaFetcher implements iAmberFetcher {
    * @return
    */
 	public function fetch($url) {
-    $api_endpoint = 'http://api.perma.dev:8000/v1/archives/';
+    $api_endpoint = PERMA_API_URL . '/v1/archives/';
     $data = array('url' => $url);
 
 		// use key 'http' even if you send the request to https://...

@@ -25,7 +25,7 @@ class Amber_List_Table extends WP_List_Table {
         $prefix = $this->db->prefix;
 
         $statement = 
-            "SELECT c.id, c.url, c.status, c.last_checked, c.message, ca.date, ca.size, ca.location, a.views, a.date as activity_date, substring_index(c.url,'://',-1) as url_sort " .
+            "SELECT c.id, c.url, c.status, c.last_checked, c.message, ca.perma_guid, ca.date, ca.size, ca.location, a.views, a.date as activity_date, substring_index(c.url,'://',-1) as url_sort " .
             "FROM ${prefix}amber_check c " .
             "LEFT JOIN ${prefix}amber_cache ca on ca.id = c.id " .
             "LEFT JOIN ${prefix}amber_activity a on ca.id = a.id ";
@@ -55,6 +55,10 @@ class Amber_List_Table extends WP_List_Table {
         if (!empty($item['location'])) {
             $url = join('/',array(get_site_url(),htmlspecialchars($item['location'])));
             $actions['view'] =  "<a href='${url}'>View</a>";     
+        }
+        if (!empty($item['perma_guid'])) {
+            $url = PERMA_ARCHIVE_URL . '/' . $item['perma_guid'];
+            $actions['view_perma'] = "<a href='${url}'>View Perma</a>";
         }
         if (!empty($item['id'])) {
             $url = join('/',array(get_site_url(),"wp-admin/tools.php?page=amber-dashboard")) . "&delete=" . $item['id'];
