@@ -58,7 +58,7 @@ class Amber_List_Table extends WP_List_Table {
         }
         if (!empty($item['perma_guid'])) {
             $url = PERMA_ARCHIVE_URL . '/' . $item['perma_guid'];
-            $actions['view_perma'] = "<a href='${url}'>View Perma</a>";
+            $actions['view_perma'] = "<a href='${url}'>Perma</a>";
         }
         if (!empty($item['id'])) {
             $url = join('/',array(get_site_url(),"wp-admin/tools.php?page=amber-dashboard")) . "&delete=" . $item['id'];

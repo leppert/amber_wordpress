@@ -134,8 +134,11 @@ class Amber {
 	  // Assume that we only have one cache of the data. This would need to change if we start tracking multiple caches
 	  if (isset($summaries['default']['location'],$summaries['default']['date'],$summaries['default']['size']) &&
 	      ($summaries['default']['size'] > 0)) {
-	    $result['data-versionurl'] = join("/", array(get_site_url(),$summaries['default']['location']));
+		$result['data-versionurl'] = join("/", array(get_site_url(),$summaries['default']['location']));
 	    $result['data-versiondate'] = date('c',$summaries['default']['date']);
+		if (!empty($summaries['default']['perma_guid'])) {
+			$result['data-permaurl'] = PERMA_ARCHIVE_URL . '/' . $summaries['default']['perma_guid'];
+		}
 	  } else {
 	    return $result;
 	  }

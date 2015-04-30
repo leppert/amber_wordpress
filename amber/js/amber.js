@@ -8,12 +8,12 @@ var amber = {
     en : {
       interstitial_html_up :
       '<div class="amber-interstitial amber-up"><a href="#" class="amber-close"></a><div class="amber-body"><div class="amber-status-text">This page should be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div>' +
-      '<a class="amber-focus" href="{{CACHE}}">View the cache</a><div class="amber-iframe-container"><a href="{{LINK}}"></a><iframe sandbox="" src="{{LINK}}"/></div><a class="amber-original-link" href="{{LINK}}">Continue to the page</a></div><a class="amber-info" href="http://amberlink.org" target="_blank">i</a></div>',
+      '<a class="amber-focus" href="{{CACHE}}">View the cache</a>{{#PERMA}}<a class="amber-focus" href="{{PERMA}}">View Perma</a>{{/PERMA}}<div class="amber-iframe-container"><a href="{{LINK}}"></a><iframe sandbox="" src="{{LINK}}"/></div><a class="amber-original-link" href="{{LINK}}">Continue to the page</a></div><a class="amber-info" href="http://amberlink.org" target="_blank">i</a></div>',
       interstitial_html_down :
       '<div class="amber-interstitial amber-down"><a href="#" class="amber-close"></a><div class="amber-body"><div class="amber-status-text">This page may not be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div>' +
-      '<a class="amber-focus" href="{{CACHE}}">View the cache</a><div class="amber-iframe-container"><a href="{{LINK}}"></a><iframe sandbox="" src="{{LINK}}"/></div><a class="amber-original-link" href="{{LINK}}">Continue to the page</a></div><a class="amber-info" href="http://amberlink.org" target="_blank">i</a></div>',
-      hover_html_up   : '<div class="amber-hover amber-up"><a class="amber-info" href="http://amberlink.org" target="_blank">i</a><div class="amber-text"><div class="amber-status-text">This page should be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="amber-links"><a href="{{CACHE}}">View the cache</a><a href="{{LINK}}" class="amber-focus">Continue to the page</a></div><div class="amber-arrow"></div></div>',
-      hover_html_down : '<div class="amber-hover amber-down"><a class="amber-info" href="http://amberlink.org" target="_blank">i</a><div class="amber-text"><div class="amber-status-text">This page may not be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="amber-links"><a href="{{CACHE}}" class="amber-focus">View the cache</a><a href="{{LINK}}">Continue to the page</a></div><div class="amber-arrow"></div></div>',
+      '<a class="amber-focus" href="{{CACHE}}">View the cache</a>{{#PERMA}}<a class="amber-focus" href="{{PERMA}}">View Perma</a>{{/PERMA}}<div class="amber-iframe-container"><a href="{{LINK}}"></a><iframe sandbox="" src="{{LINK}}"/></div><a class="amber-original-link" href="{{LINK}}">Continue to the page</a></div><a class="amber-info" href="http://amberlink.org" target="_blank">i</a></div>',
+      hover_html_up   : '<div class="amber-hover amber-up"><a class="amber-info" href="http://amberlink.org" target="_blank">i</a><div class="amber-text"><div class="amber-status-text">This page should be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="amber-links"><a href="{{CACHE}}">View the cache</a>{{#PERMA}}<a href="{{PERMA}}">View Perma</a>{{/PERMA}}<a href="{{LINK}}" class="amber-focus">Continue to the page</a></div><div class="amber-arrow"></div></div>',
+      hover_html_down : '<div class="amber-hover amber-down"><a class="amber-info" href="http://amberlink.org" target="_blank">i</a><div class="amber-text"><div class="amber-status-text">This page may not be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="amber-links"><a href="{{CACHE}}" class="amber-focus">View the cache</a>{{#PERMA}}<a class="amber-focus" href="{{PERMA}}">View Perma</a>{{/PERMA}}<a href="{{LINK}}">Continue to the page</a></div><div class="amber-arrow"></div></div>',
       this_site: "This site"
     },
     fa : {
@@ -65,6 +65,14 @@ var amber = {
   },
 
   replace_args : function (s, args) {
+    var block_regex = /{{#(\w+)}}(.*?){{\/\1}}/,
+        block = s.match(block_regex);
+
+    while (block) {
+      s = s.replace(block_regex, args['{{'+block[1]+'}}'] ? block[2] : '');
+      block = s.match(block_regex);
+    }
+
     for (var key in args) {
       s = s.replace(new RegExp(key,"g"), args[key]);
     }
@@ -109,11 +117,12 @@ var amber = {
     return result;
   },
 
-  parse_cache : function(cache_url, cache_date) {
+  parse_cache : function(cache_url, cache_date, perma_url) {
     var result = {};
     result.default = {};
     result.default.cache = cache_url;
     result.default.date = cache_date;
+    result.default.perma = perma_url;
     return result;
   },
 
@@ -137,7 +146,7 @@ var amber = {
 
   show_cache : function(e) {
     var behavior = amber.parse_behavior(this.getAttribute("data-amber-behavior"));
-    var cache = amber.parse_cache(this.getAttribute("data-versionurl"), this.getAttribute("data-versiondate"));
+    var cache = amber.parse_cache(this.getAttribute("data-versionurl"), this.getAttribute("data-versiondate"), this.getAttribute("data-permaurl"));
     if (amber.execute_action(behavior,"cache") && cache.default) {
       window.location.href = cache.default.cache;
       e.preventDefault();
@@ -146,7 +155,7 @@ var amber = {
 
   show_interstitial : function (e) {
     var behavior = amber.parse_behavior(this.getAttribute("data-amber-behavior"));
-    var cache = amber.parse_cache(this.getAttribute("data-versionurl"), this.getAttribute("data-versiondate"));
+    var cache = amber.parse_cache(this.getAttribute("data-versionurl"), this.getAttribute("data-versiondate"), this.getAttribute("data-permaurl"));
 
     if (amber.execute_action(behavior,"popup") && cache.default) {
       /* Add the window to the DOM */
@@ -156,11 +165,12 @@ var amber = {
 
       /* Substitute dynamic text */
       var replacements = {
-        '{{DATE}}' : amber.format_date_from_string(cache.default.date),
-        '{{NAME}}' : (amber.name == undefined) ? amber.get_text('this_site') : amber.name,
+        '{{DATE}}'  : amber.format_date_from_string(cache.default.date),
+        '{{NAME}}'  : (amber.name == undefined) ? amber.get_text('this_site') : amber.name,
         '{{CACHE}}' : cache.default.cache,
-        '{{LINK}}' : this.getAttribute("href")
-      }
+        '{{LINK}}'  : this.getAttribute("href"),
+        '{{PERMA}}' : cache.default.perma
+      };
 
       var amberElement = document.createElement('div');
       amberElement.innerHTML = amber.replace_args(behavior.default.status == "up" ? amber.get_text('interstitial_html_up') : amber.get_text('interstitial_html_down'), replacements);
@@ -236,14 +246,15 @@ var amber = {
   start_link_hover : function (e) {
     var behavior = amber.parse_behavior(this.getAttribute("data-amber-behavior"));
     if (amber.execute_action(behavior,"hover")) {
-      var cache = amber.parse_cache(this.getAttribute("data-versionurl"), this.getAttribute("data-versiondate"));
+      var cache = amber.parse_cache(this.getAttribute("data-versionurl"), this.getAttribute("data-versiondate"), this.getAttribute("data-permaurl"));
       var args = {
         '{{DATE}}' : amber.format_date_from_string(cache.default.date),
         '{{NAME}}' : (amber.name == undefined) ? amber.get_text('this_site') : amber.name,
         '{{CACHE}}' : cache.default.cache,
-        '{{LINK}}' : this.getAttribute("href")
+        '{{LINK}}' : this.getAttribute("href"),
+        '{{PERMA}}' : cache.default.perma
       };
-      t = this;
+      var t = this;
       var delay = behavior[amber.country] ? behavior[amber.country].delay : behavior.default.delay;
       var timer = setTimeout(function() {
         var amberElement = document.createElement('div');

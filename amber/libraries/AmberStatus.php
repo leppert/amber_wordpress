@@ -45,7 +45,7 @@ class AmberStatus implements iAmberStatus {
 
   public function get_summary($url) {
     $prefix = $this->table_prefix;
-    $result = $this->db->select(' SELECT ca.location, ca.date, ch.status, ca.size ' .
+    $result = $this->db->select(' SELECT ca.location, ca.date, ch.status, ca.size, ca.perma_guid ' .
                                 " FROM ${prefix}amber_cache ca, ${prefix}amber_check ch " .
                                 ' WHERE ca.url = %s AND ca.id = ch.id', 
                                 array($url));
