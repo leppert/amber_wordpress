@@ -3,6 +3,11 @@ class AmberInstall {
 
 	private static function get_tables() {
 		$tables = array();
+		$tables['amber_providers'] =  "(
+		  id SMALLINT NOT NULL AUTO_INCREMENT,
+		  name VARCHAR(255),
+		  PRIMARY KEY id (id)
+		)";
 		$tables['amber_check'] =  "(
 		  id VARCHAR(32) NOT NULL,
 		  url VARCHAR(2000) DEFAULT '' NOT NULL,
@@ -12,18 +17,24 @@ class AmberInstall {
 		  message VARCHAR(2000),
 		  PRIMARY KEY id (id)
 		)";
-		$tables['amber_cache'] =  "(
+		$tables['amber_local_cache'] =  "(
 		  id VARCHAR(32) NOT NULL,
 		  url VARCHAR(2000) DEFAULT '' NOT NULL,
 		  location VARCHAR(2000) DEFAULT '' NOT NULL,
 		  date int,
 		  type VARCHAR(200) DEFAULT '' NOT NULL,
 		  size int,
+		  PRIMARY KEY id (id)
+		)";
+		$tables['amber_perma_cache'] =  "(
+		  id VARCHAR(255) NOT NULL,
 		  perma_guid VARCHAR(255),
+		  url VARCHAR(2000) DEFAULT '' NOT NULL,
 		  PRIMARY KEY id (id)
 		)";
 		$tables['amber_activity'] =  "(
 		  id VARCHAR(32) NOT NULL,
+		  provider SMALLINT NOT NULL,
 		  date int,
 		  views int DEFAULT 0 NOT NULL,
 		  PRIMARY KEY id (id)
@@ -63,10 +74,17 @@ class AmberInstall {
 			dbDelta( $sql );
 		}
 
+		/* Set default providers */
+		$table_name = $wpdb->prefix . 'amber_providers';
+		foreach (Amber::$providers as $provider) {
+			$wpdb->insert($table_name, array('name' => $provider));
+		}
+
 		$options = get_option('amber_options');
 		if (empty($options)) {	
 			/* Set default options */
 			$options =  array(
+	            'amber_provider' => Amber::get_provider_id('local'),
 	            'amber_max_file' => 1000,
 	            'amber_max_disk' => 1000,
 	            'amber_available_action' => AMBER_ACTION_NONE,
@@ -77,7 +95,7 @@ class AmberInstall {
 	            'amber_update_strategy' => 0,
 	            'amber_country_id' => '',
 	            'amber_excluded_sites' => parse_url(home_url(), PHP_URL_HOST),
-	            );
+            );
 
 			update_option('amber_options', $options);			
 		}

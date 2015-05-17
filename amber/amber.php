@@ -21,6 +21,16 @@ define("PERMA_ARCHIVE_URL","http://perma.dev:8000");
 
 class Amber {
 
+	/**
+	 * Begin at index 1 to match MySQL's index
+	 */
+	public static $providers = array(1 => 'local', 'perma');
+
+	public static function get_provider_id($name)
+	{
+		return array_search($name, self::$providers);
+	}
+
 	public static function get_option($key, $default = "")
 	{
 		$options = get_option('amber_options');
